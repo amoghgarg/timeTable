@@ -1,69 +1,174 @@
 var gulp = require('gulp');
-var fs = require('fs');
-var browserify = require('browserify');
-var watchify = require('watchify');
-var babelify = require('babelify');
-var rimraf = require('rimraf');
-var source = require('vinyl-source-stream');
-var _ = require('lodash');
+var path = require('path');
+var $ = require('gulp-load-plugins')();
+var del = require('del');
+var isProduction = false;
+
 var browserSync = require('browser-sync');
-var reload = browserSync.reload;
+var reload      = browserSync.reload;
+var watchify   = require('watchify');
+var notify = require('gulp-notify');
 
-var config = {
-  entryFile: './src/app.js',
-  outputDir: './dist/',
-  outputFile: 'app.js'
-};
+var port = 1337;
+var dist = './dist/';
+var datetime = "node_modules/react-datetime/css/";
+var source     = require('vinyl-source-stream');
 
-// clean the output directory
-gulp.task('clean', function(cb){
-    rimraf(config.outputDir, cb);
-});
+var browserify = require("browserify");
+var babelify = require("babelify");
 
-var bundler;
-function getBundler() {
-  if (!bundler) {
-    bundler = watchify(browserify(config.entryFile, _.extend({ debug: true }, watchify.args)));
+// https://github.com/ai/autoprefixer
+var autoprefixerBrowsers = [
+  'ie >= 9',
+  'ie_mob >= 10',
+  'ff >= 30',
+  'chrome >= 34',
+  'safari >= 6',
+  'opera >= 23',
+  'ios >= 6',
+  'android >= 4.4',
+  'bb >= 10'
+];
+
+gulp.task('browserify', function () {
+  console.log("browserify started")
+  var watcher = watchify(
+    browserify({
+      entries: ['./src/js/app.js'],
+      debug: true,
+      cache: {},
+      packageCache: {}
+    })
+      .transform(babelify)
+   );
+  function bundle () {
+    return watcher
+      .bundle()
+      .on('error', function(err) {
+            return notify().write(err);
+        })
+      .pipe(source('src/js/app.js'))
+      .pipe(gulp.dest('./dist'));
   }
-  return bundler;
-};
 
-function bundle() {
-  return getBundler()
-    .transform(babelify)
-    .bundle()
-    .on('error', function(err) { console.log('Error: ' + err.message); })
-    .pipe(source(config.outputFile))
-    .pipe(gulp.dest(config.outputDir))
-    .pipe(reload({ stream: true }));
-}
+  function update () {
+    var updateStart = Date.now();
 
-gulp.task('build-persistent', ['clean'], function() {
+    console.log('JavaScript changed - recomiling via Browserify');
+
+    bundle()
+      .on('error', function(err) {
+            return notify().write(err);
+        })
+      .on('end', function () {
+        console.log('Complete!', (Date.now() - updateStart) + 'ms');
+        browserSync.reload();
+
+      });
+  }
+
+  watcher.on('update', update);
+
   return bundle();
 });
 
-gulp.task('build', ['build-persistent'], function() {
-  process.exit(0);
+// copy html from app to dist
+gulp.task('html', function() {
+  var pipeRes =  gulp.src('./src/index.html')
+    .pipe(gulp.dest(dist))
+    .on('end', function() {
+      browserSync.reload();
+    });
+
+    return pipeRes;
+    //.pipe(browserSync.reload);
+    //.pipe($.connect.reload());
 });
 
-gulp.task('watch', ['build-persistent'], function() {
+// gulp.task('styles', function(cb){
+//   'bundle.css';
+//   // convert stylus to css
+//   return gulp.src([app + 'css/default.css', app + 'css/common.css', datetime + "*.css", app + 'css/font-awesome.css'])
+//     .pipe(concatCss('bundle.css'))
+//     .pipe($.autoprefixer({browsers: autoprefixerBrowsers}))
+//     .pipe(gulp.dest(dist + 'css/'))
+//     .pipe($.size({ title: 'css' }))
+//     .pipe(browserSync.stream())
+//     .on('end', function() {
+//       browserSync.reload();
+//     });
+//     //.pipe($.connect.reload());
+// });
 
-  browserSync({
-    server: {
-      baseDir: './'
+// add livereload on the given port
+gulp.task('serve', function() {
+  $.connect.server({
+    root: dist,
+    port: port,
+    livereload: {
+      port: 35729
     }
-  });
-
-  getBundler().on('update', function() {
-    gulp.start('build-persistent')
   });
 });
 
-// WEB SERVER
-gulp.task('serve', function () {
-  browserSync({
-    server: {
-      baseDir: './'
-    }
+// browser-sync task for starting the server.
+gulp.task('browser-sync', function() {
+    browserSync({
+        open: true,
+        port: port,
+        server: {
+            baseDir: dist
+        }
+    });
+});
+
+// copy images
+// gulp.task('images', function(cb) {
+//   return gulp.src(app + 'images/**/*.{png,jpg,jpeg,gif,svg,ico}')
+//     .pipe($.size({ title: 'images' }))
+//     .pipe(gulp.dest(dist + 'images/'));
+// });
+//
+// // copy fonts
+// gulp.task('fonts', function(cb) {
+//   return gulp.src(app + 'fonts/*')
+//     .pipe($.size({ title: 'fonts' }))
+//     .pipe(gulp.dest(dist + 'fonts/'));
+// });
+
+gulp.task('reload', function(){
+  browserSync.reload();
+});
+
+// watch styl, html and js file changes
+gulp.task('watch', function() {
+  //gulp.watch(app + 'css/**/*.css', ['styles']);
+  gulp.watch('./src/index.html', ['html']);
+});
+
+
+// remove bundles
+// gulp.task('clean', function(cb) {
+//   del([dist], cb);
+// });
+
+gulp.task('clean', function(cb) {
+  del([dist]).then(function(){
+    cb();
   });
+});
+
+
+// by default build project and then watch files in order to trigger livereload
+//gulp.task('default', ['build', 'serve', 'watch']);
+gulp.task('default', ['build', 'browser-sync', 'watch']);
+
+// waits until clean is finished then builds the project for deployment
+gulp.task('buildDeploy', ['clean'], function(){
+  gulp.start(['html', 'scripts']);
+});
+
+// waits until clean is finished then builds the project for development
+gulp.task('build', ['clean'], function(){
+  gulp.start(['html','browserify']);
 });
