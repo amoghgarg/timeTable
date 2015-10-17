@@ -34,15 +34,18 @@ export default {
       }.bind(this)
     });
 
-
+    if(!location.hash){
+      //default set to todays date.
+      location.hash = (new Date()).toISOString().slice(0,10).replace(/-/g,"")
+    }
+    this.hash = location.hash;
     this.render();
     console.log("Controller installed.");
   },
 
   render(){
     //get the date from the url
-    var date = "today";
-
+    var date = this.hash.substr(1);
     $("#eventsList").empty();
     var todaysEvents = JSON.parse(localStorage.getItem(date));
 
