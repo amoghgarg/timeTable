@@ -10,4 +10,17 @@
 #eventsDisplay > div {
   background-color: pink;
   position: absolute;
+  border-style: solid;
+  border-width: 2px;
+}
+
+#hourRange > ul {
+  list-style-type: none;
+  padding: 0;
+  line-height: 40px;
+  margin: 0px;
+}
+
+#hourRange {
+  margin: 0;
 }

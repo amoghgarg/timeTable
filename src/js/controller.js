@@ -8,6 +8,8 @@ export default {
 
   init(){
 
+    this.rowHeight = 40;
+
     $("#addButton").bind("click", function(){
       console.log("adding")
       this.dialog.dialog( "open" );
@@ -21,7 +23,7 @@ export default {
       width: 350,
       modal: true,
       buttons: {
-        "Create": function(){
+        "Save": function(){
           store.addEvent();
           this.render();
         }.bind(this),
@@ -50,26 +52,73 @@ export default {
     eventsDisplay.empty();
     var eventsBlobs = this.getEventBlobs(date);
 
+    console.log(this.rowHeight);
+
     eventsBlobs.map(blob => {
       var crashingEventsCount = blob.events.length;
       var eachWidth = 100/crashingEventsCount;
       blob.events.map((event, index) => {
-        var top = event.starts*50/2400 + "px";
-        var height = "50px";
+        var top = event.starts*this.rowHeight + "px";
+        var height = (event.ends - event.starts)*this.rowHeight;
         var left = index*eachWidth + "%";
         var width = eachWidth + "%";
         var script = "top: " + top + "; height: " + height + "; width: " + width + "; left: " + left;
 
         var eventDiv = $('<div />')
                        .attr("style", script)
-                       .text(event.text);
+                       .text(event.text)
+                       .dblclick(function(){
+                         this.showEditDialog(date, event);
+                       }.bind(this));
 
+
+        var deleteButton = $('<span />')
+                           .attr("class", "ui-icon ui-icon-trash")
+                           .text("CLOSE")
+                           .click(function(){
+                             store.deleteEvent(date, event);
+                             this.render();
+                           }.bind(this))
+        eventDiv.append(deleteButton)
+                .draggable({
+                  axis: "y",
+                  containment: "#eventsDisplay",
+                  grid: [1, this.rowHeight/2],
+                  stop: function(dragEvent, ui){
+                    var newFromTime = Number((ui.position.top)/40*1);
+                    var newEvent = {
+                      date: date,
+                      fromTime: newFromTime,
+                      toTime: newFromTime + Number(event.ends) - Number(event.starts),
+                      text: event.text
+                    };
+                    store.editEvent(date, event, newEvent);
+                    this.render();
+                  }.bind(this)
+                });
         eventsDisplay.append(eventDiv);
       })
 
     })
 
     console.log(eventsBlobs);
+  },
+
+  showEditDialog(date, event){
+    $("#eventDate").val(date);
+    $("#fromTime").val(event.starts);
+    $("#toTime").val(event.ends);
+    $("#eventText").val(event.text);
+    this.dialog.dialog('option', 'buttons', {
+      'Save': function(){
+        store.editEvent(date, event);
+        this.render()
+      }.bind(this),
+      "Cancel": function() {
+        this.dialog.dialog( "close" );
+      }.bind(this)
+    });
+    this.dialog.dialog("open");
   },
 
   //Check if the data object is empty
@@ -91,7 +140,8 @@ export default {
           var singleEvent = {
             starts: fromTime,
             ends: events[fromTime][0].ends,
-            text: events[fromTime][0].text
+            text: events[fromTime][0].text,
+            created: events[fromTime][0].created,
           }
           //remove the event
           events[fromTime].shift();
@@ -136,7 +186,8 @@ export default {
             blob.events.push({
               starts: fromTime,
               ends: event.ends,
-              text: event.text
+              text: event.text,
+              created: event.created
             })
             blob.startTime = blob.startTime < fromTime ? blob.startTime : fromTime;
             blob.endTime = blob.endTime > event.ends ? blob.endTime : event.ends;

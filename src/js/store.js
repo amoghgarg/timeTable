@@ -6,15 +6,26 @@ export default {
   //startTime
   //endTime
   //text
-  addEvent: function(start, end, text){
-    var eventDate = $("#eventDate").val();
-    var fromTime = $("#fromTime").val();
-    var toTime = $("#toTime").val();
-    var eventText = $("#eventText").val();
+  addEvent: function(event){
+
+    var eventDate, fromTime, toTime, eventText;
+    if(arguments.length == 0){
+      //Get the values from the form
+      eventDate = $("#eventDate").val();
+      fromTime = $("#fromTime").val();
+      toTime = $("#toTime").val();
+      eventText = $("#eventText").val();
+    } else if(arguments.length == 1){
+      eventDate = event.date;
+      fromTime = event.fromTime;
+      toTime = event.toTime;
+      eventText = event.text
+    }
 
     var eventObject = {
       ends: toTime,
-      text: eventText
+      text: eventText,
+      created: (new Date()).toUTCString()
     };
 
     // getting events for the date specified
@@ -41,15 +52,30 @@ export default {
     }
   },
 
-  deleteEvent: function(date, fromTime, index){
-    console.log(date + " " + fromTime + " " + index);
+  editEvent: function(date, oldEvent, newEvent){
+    this.deleteEvent(date, oldEvent);
+    if(arguments.length === 2){
+      this.addEvent();
+    }
+    this.addEvent(newEvent);
+  },
+
+  deleteEvent: function(date, event){
+    var fromTime = event.starts;
+    var created = event.created;
+
+    console.log(date)
+    console.log(event)
+    console.log(created)
 
     var daysEvents = JSON.parse(localStorage.getItem(date));
     var eventsStartingTogether = daysEvents[fromTime];
-    eventsStartingTogether.splice(index, 1);
-    daysEvents[fromTime] = eventsStartingTogether;
-    localStorage.setItem(date, JSON.stringify(daysEvents));
+    var remainingEvents = eventsStartingTogether.filter(event => {
 
+      return !(event.created === created);
+    });
+    daysEvents[fromTime] = remainingEvents;
+    localStorage.setItem(date, JSON.stringify(daysEvents));
   }
 
 }

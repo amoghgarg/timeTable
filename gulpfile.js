@@ -89,7 +89,7 @@ gulp.task('html', function() {
 gulp.task('styles', function(cb){
   'bundle.css';
   // convert stylus to css
-  return gulp.src(['src/css/default.css'])
+  return gulp.src(['src/css/*.css', ])
     .pipe(concatCss('bundle.css'))
     //.pipe($.autoprefixer({browsers: autoprefixerBrowsers}))
     .pipe(gulp.dest(dist + 'css/'))
