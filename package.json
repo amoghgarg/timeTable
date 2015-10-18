@@ -18,6 +18,7 @@
     "del": "^1.1.1",
     "eslint": "^1.7.1",
     "gulp": "~3.8.10",
+    "gulp-concat-css": "^2.2.0",
     "gulp-load-plugins": "^1.0.0",
     "gulp-notify": "^2.2.0",
     "gulp-rename": "^1.2.0",

@@ -1,0 +1,13 @@
+#eventsBoard {
+  display: flex;
+}
+
+#eventsDisplay {
+  flex: 1;
+  position: relative;
+}
+
+#eventsDisplay > div {
+  background-color: pink;
+  position: absolute;
+}

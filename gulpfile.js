@@ -3,6 +3,7 @@ var path = require('path');
 var $ = require('gulp-load-plugins')();
 var del = require('del');
 var isProduction = false;
+var concatCss = require('gulp-concat-css');
 
 var browserSync = require('browser-sync');
 var reload      = browserSync.reload;
@@ -85,20 +86,19 @@ gulp.task('html', function() {
     //.pipe($.connect.reload());
 });
 
-// gulp.task('styles', function(cb){
-//   'bundle.css';
-//   // convert stylus to css
-//   return gulp.src([app + 'css/default.css', app + 'css/common.css', datetime + "*.css", app + 'css/font-awesome.css'])
-//     .pipe(concatCss('bundle.css'))
-//     .pipe($.autoprefixer({browsers: autoprefixerBrowsers}))
-//     .pipe(gulp.dest(dist + 'css/'))
-//     .pipe($.size({ title: 'css' }))
-//     .pipe(browserSync.stream())
-//     .on('end', function() {
-//       browserSync.reload();
-//     });
-//     //.pipe($.connect.reload());
-// });
+gulp.task('styles', function(cb){
+  'bundle.css';
+  // convert stylus to css
+  return gulp.src(['src/css/default.css'])
+    .pipe(concatCss('bundle.css'))
+    //.pipe($.autoprefixer({browsers: autoprefixerBrowsers}))
+    .pipe(gulp.dest(dist + 'css/'))
+    .pipe(browserSync.stream())
+    .on('end', function() {
+      browserSync.reload();
+    });
+    //.pipe($.connect.reload());
+});
 
 // add livereload on the given port
 gulp.task('serve', function() {
@@ -142,7 +142,7 @@ gulp.task('reload', function(){
 
 // watch styl, html and js file changes
 gulp.task('watch', function() {
-  //gulp.watch(app + 'css/**/*.css', ['styles']);
+  gulp.watch('./src/css/*.css', ['styles']);
   gulp.watch('./src/index.html', ['html']);
 });
 
@@ -165,10 +165,10 @@ gulp.task('default', ['build', 'browser-sync', 'watch']);
 
 // waits until clean is finished then builds the project for deployment
 gulp.task('buildDeploy', ['clean'], function(){
-  gulp.start(['html', 'scripts']);
+  gulp.start(['html', 'styles', 'scripts']);
 });
 
 // waits until clean is finished then builds the project for development
 gulp.task('build', ['clean'], function(){
-  gulp.start(['html','browserify']);
+  gulp.start(['html', 'styles', 'browserify']);
 });
