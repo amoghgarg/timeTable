@@ -53,15 +53,12 @@ export default {
   },
 
   editEvent: function(date, oldEvent, newEvent){
-    console.log("Old Event")
-    console.log(oldEvent)
-    console.log("New Event")
-    console.log(newEvent)
     this.deleteEvent(date, oldEvent);
     if(arguments.length === 2){
       this.addEvent();
+    }else{
+      this.addEvent(newEvent);
     }
-    this.addEvent(newEvent);
   },
 
   deleteEvent: function(date, event){
