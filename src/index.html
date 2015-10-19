@@ -5,11 +5,24 @@
     <meta name="mobile-web-app-capable" content="yes">
   </head>
   <body>
-    <button id="addButton" class="addButton">Add</button>
+    <div class = "header" id = "header">
+      <div id = "headerDates">
+        <button id="goToToday">Today</button>
+        <span id="prevDateButton" class = "ui-icon ui-icon-seek-prev"></span>
+        <button id="displayDateButton">date</button>
+        <div id = "datepicker"></div>
+        <span id="nextDateButton" class = "ui-icon ui-icon-seek-next"></span>
+      </div>
+      <div id = "headerButtons">
+        <button id="addButton" class="addButton">Add</button>
+        <button id="showInfoButton">i</button>
+      </div>
+    </div>
+
 
     <script src="./src/js/app.js"> </script>
 
-    <div id="dialog-form" title="Create new user">
+    <div id="addEventForm" title="Create new user">
       <p class="validateTips">All form fields are required.</p>
         <label for="eventDate">Date</label>
         <input type="text" name="eventDate" id="eventDate">
@@ -37,12 +50,25 @@
       </div>
     </div>
 
+    <div id="infoDialog">
+      <p>
+        i: show info
+        t: go to today
+        left: previous day
+        right: next day
+        n: add new event
+      </p>
+      <p>
+        draggable
+        size change
+      </p>
+    </div>
+
     <script>
     document.addEventListener("DOMContentLoaded", function(event) {
       app();
     });
     </script>
-
   </body>
   <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/>
   <link rel="stylesheet" type="text/css" href="./css/bundle.css">

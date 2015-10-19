@@ -16,11 +16,16 @@ export default {
       this.showEditDialog();
     }.bind(this));
 
+    $("#showInfoButton").bind("click", function(){
+      $("#infoDialog").dialog("open");
+    }.bind(this));
+
     window.onhashchange = this.render.bind(this);
 
     $(document).keydown(function (e){
-      //press "n" to add new.
+
       if(!this.dialog.dialog("isOpen")){
+        //press "n" to add new.
         if(e.keyCode == 78){
             e.preventDefault();
             this.showEditDialog();
@@ -31,24 +36,47 @@ export default {
           e.preventDefault();
           location.hash = Util.getDateString("today", this.hash);
         }
+
         //press right to next date
         if(e.keyCode == 39){
           e.preventDefault();
           location.hash = Util.getDateString("next", this.hash);
         }
+
         //press left to left date
         if(e.keyCode == 37){
           e.preventDefault();
           location.hash = Util.getDateString("previous", this.hash);
+        }
+
+        //press i to show help
+        if(e.keyCode == 73){
+          e.preventDefault();
+          if(!$("#infoDialog").dialog("isOpen")){
+            $("#infoDialog").dialog("open");
+          }else{
+            $("#infoDialog").dialog("close");
+          }
         }
       }
 
     }.bind(this));
     ////////////////////////////////////////////////
 
+    $("#prevDateButton").click(function(){
+      location.hash = Util.getDateString("previous", this.hash);
+    }.bind(this));
+
+    $("#nextDateButton").click(function(){
+      location.hash = Util.getDateString("next", this.hash);
+    }.bind(this));
+
+    $("#goToToday").click(function(){
+      location.hash = Util.getDateString("today", this.hash);
+    }.bind(this));
 
     // Initialise the new event form
-    this.dialog = $( "#dialog-form" ).dialog({
+    this.dialog = $( "#addEventForm" ).dialog({
       autoOpen: false,
       height: 300,
       width: 350,
@@ -62,6 +90,27 @@ export default {
       close: function() {
         this.render();
       }.bind(this)
+    });
+
+    //Initialise info dialog
+    $("#infoDialog").dialog({
+        modal: true,
+        autoOpen: false,
+        closeText: ""
+    });
+
+    //Datepicker setting
+    $("#datepicker").hide();
+    $("#displayDateButton").click(function(){
+        $("#datepicker").toggle();
+    });
+    $("#datepicker").datepicker({
+      dateFormat: "yymmdd",
+      onSelect: function(value) {
+        console.log(value);
+        $("#datepicker").hide();
+        location.hash = value;
+       }
     });
 
     // Get the date from the url
@@ -80,6 +129,10 @@ export default {
     var eventsDisplay = $("#eventsDisplay");
     eventsDisplay.empty();   //empty the currently displaying events.
     var eventsBlobs = this.getEventBlobs(date);     //getting the events from the local storage. each blob is a group of crashing events
+
+    //Datepicker button for selecting display date
+    var displayDate =  Util.getDateFromUrl(date).toDateString();
+    $("#displayDateButton").text(displayDate);
 
     eventsBlobs.map(blob => {
       var crashingEventsCount = blob.events.length;   //crashing Events are those which have some overlap in time, and thus need to rendered with divided width.

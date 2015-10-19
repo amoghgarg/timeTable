@@ -24,3 +24,33 @@
 #hourRange {
   margin: 0;
 }
+
+#header {
+  display: flex;
+}
+
+#headerDates {
+  width: 300px;
+  display: flex;
+}
+
+/*#headerDates span {
+  flex: 1;
+}*/
+
+#displayDateButton button {
+  flex: 3;
+}
+
+#headerButtons {
+  flex: 1;
+}
+
+#headerButtons > button {
+  float: right;
+}
+
+body{
+    -webkit-user-select: none;
+    user-select: none;
+}
