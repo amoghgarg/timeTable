@@ -11,10 +11,40 @@ export default {
     this.rowHeight = 40;
 
     $("#addButton").bind("click", function(){
-      console.log("adding")
-      this.dialog.dialog( "open" );
-      console.log($("#eventsList").html());
+      this.showEditDialog();
     }.bind(this));
+
+
+    window.onhashchange = this.render.bind(this);
+
+    $(document).keydown(function (e){
+      //press "n" to add new.
+      if(!this.dialog.dialog("isOpen")){
+        if(e.keyCode == 78){
+            e.preventDefault();
+            this.showEditDialog();
+        }
+
+        //press t to go todays
+        if(e.keyCode == 84){
+          e.preventDefault();
+          console.log()
+          location.hash = this.getDateString("today");
+        }
+        //press right to next date
+        if(e.keyCode == 39){
+          e.preventDefault();
+          location.hash = this.getDateString("next");
+        }
+        //press left to left date
+        if(e.keyCode == 37){
+          e.preventDefault();
+          location.hash = this.getDateString("previous");
+        }
+      }
+
+    }.bind(this));
+
 
 
     this.dialog = $( "#dialog-form" ).dialog({
@@ -23,15 +53,11 @@ export default {
       width: 350,
       modal: true,
       buttons: {
-        "Save": function(){
-          store.addEvent();
-          this.dialog.dialog("close");
-          this.render();
-        }.bind(this),
         "Cancel": function() {
           this.dialog.dialog( "close" );
         }.bind(this)
       },
+      closeText: "",
       close: function() {
         this.render();
       }.bind(this)
@@ -41,18 +67,21 @@ export default {
       //default set to todays date.
       location.hash = (new Date()).toISOString().slice(0,10).replace(/-/g,"")
     }
-    this.hash = location.hash;
     this.render();
+    this.hash = location.hash.substr(1);
     console.log("Controller installed.");
   },
 
   render(){
     //get the date from the url
-    var date = this.hash.substr(1);
+    this.hash = location.hash.substr(1);
+    var date = this.hash;
+    console.log(date)
     var eventsDisplay = $("#eventsDisplay");
     eventsDisplay.empty();
     var eventsBlobs = this.getEventBlobs(date);
 
+    console.log(eventsBlobs)
     console.log(this.rowHeight);
 
     eventsBlobs.map(blob => {
@@ -105,10 +134,8 @@ export default {
                   //helper: true,
                   minHeight: this.rowHeight/2,
                   stop: function(resizeEvent, ui){
-                    console.log("Old Event")
-                    console.log(event)
+                    console.log("Rezize stopped")
                     var draggedHandle = ui.element.data('ui-resizable').axis;
-                    console.log(draggedHandle)
                     if(draggedHandle == "n"){
                       //end Time is same, only the start time has chanegd.
                       var newDuration = (ui.size.height / this.rowHeight);
@@ -121,8 +148,6 @@ export default {
                     }else if (draggedHandle == "s"){
                       //start Time is same, only the end time has chanegd.
                       var newDuration = (ui.size.height / this.rowHeight);
-                      console.log(ui.size)
-                      console.log(newDuration)
                       var newEvent = {
                         date: date,
                         fromTime: Number(event.starts),
@@ -130,8 +155,6 @@ export default {
                         text: event.text
                       };
                     }
-                    console.log("newEvent")
-                    console.log(newEvent)
                     store.editEvent(date, event, newEvent);
                     this.render();
                   }.bind(this)
@@ -141,18 +164,35 @@ export default {
 
     })
 
-    // console.log(eventsBlobs);
+    console.log(eventsBlobs);
   },
 
   showEditDialog(date, event){
-    $("#eventDate").val(date);
-    $("#fromTime").val(event.starts);
-    $("#toTime").val(event.ends);
-    $("#eventText").val(event.text);
+
+    var editing = arguments.length == 2 ? true:false; //false means adding new event
+    if(editing){
+      $("#eventDate").val(date);
+      $("#fromTime").val(event.starts);
+      $("#toTime").val(event.ends);
+      $("#eventText").val(event.text);
+    }
+    else{
+      //new event, so just fill the date.
+      $("#eventDate").val(this.hash);
+      $("#fromTime").val("");
+      $("#toTime").val("");
+      $("#eventText").val("");
+    }
+
     this.dialog.dialog('option', 'buttons', {
       'Save': function(){
-        store.editEvent(date, event);
-        this.render()
+        if(editing){
+          store.editEvent(date, event);
+        }else{
+          store.addEvent();
+        }
+        this.dialog.dialog("close");
+        this.render();
       }.bind(this),
       "Cancel": function() {
         this.dialog.dialog( "close" );
@@ -164,11 +204,13 @@ export default {
   //Check if the data object is empty
   isEventsEmpty(events){
     var result = true;
-    Object.keys(events).forEach(fromTime => {
-      if(events[fromTime].length > 0){
-        result = false;
-      }
-    });
+    if(events){
+      Object.keys(events).forEach(fromTime => {
+        if(events[fromTime].length > 0){
+          result = false;
+        }
+      });
+    }
     return result;
   },
 
@@ -194,7 +236,6 @@ export default {
   //Get the event for the date from the location and put the clashing events together
   getEventBlobs(date){
     //get the date from the url
-    var date = this.hash.substr(1);
     var events = JSON.parse(localStorage.getItem(date));
     // console.log(events);
 
@@ -219,8 +260,8 @@ export default {
         events[fromTime].map((event, index) => {
           // console.log("---------enevt");
           // console.log(event);
-          var startsInBlob = Number(fromTime) >= Number(blob.startTime) && Number(fromTime) <= Number(blob.endTime);
-          var endsInBlob = Number(event.ends) >= Number(blob.startTime) && Number(event.ends) <= Number(blob.endTime);
+          var startsInBlob = Number(fromTime) >= Number(blob.startTime) && Number(fromTime) < Number(blob.endTime);
+          var endsInBlob = Number(event.ends) > Number(blob.startTime) && Number(event.ends) <= Number(blob.endTime);
           if(startsInBlob || endsInBlob){
             // console.log("pushing")
             blob.events.push({
@@ -249,7 +290,38 @@ export default {
     }
     return eventBlobs;
 
+  },
+
+  getDateString(which){
+    if(which == "today"){
+      return (new Date()).toISOString().slice(0,10).replace(/-/g,"");
+    }
+    if(which == "next"){
+      var currentDate = this.getDateFromUrl();
+      var nextDate = new Date();  //temp
+      nextDate.setTime(currentDate.getTime() + 86400000);   //adding 1 day in miliseconds
+      var nextDateStr = nextDate.toLocaleString("en-GB").substr(0,10).split("/").reverse().join("");
+      return nextDateStr;
+    }
+    if(which == "previous"){
+      var currentDate = this.getDateFromUrl();
+      var nextDate = new Date();  //temp
+      nextDate.setTime(currentDate.getTime() - 86400000);   //subtract 1 day in miliseconds
+      var nextDateStr = nextDate.toLocaleString("en-GB").substr(0,10).split("/").reverse().join("");
+      return nextDateStr;
+    }
+  },
+
+  getDateFromUrl(){
+    var urlDate = this.hash
+    var year = urlDate.substr(0,4);
+    var month = urlDate.substr(4,2) - 1;
+    var day = urlDate.substr(6,2);
+    var date = new Date(year, month, day);
+    return (date);
+
   }
+
 
 
 }
