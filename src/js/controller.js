@@ -6,6 +6,8 @@ import 'jquery-ui';
 
 export default {
 
+
+
   init(){
 
     //height of 1 hour event, in pixels
@@ -88,9 +90,11 @@ export default {
       },
       closeText: "",
       close: function() {
+        $("#toTime").empty();
         this.render();
       }.bind(this)
     });
+
 
     //Initialise info dialog
     $("#infoDialog").dialog({
@@ -99,19 +103,32 @@ export default {
         closeText: ""
     });
 
-    //Datepicker setting
-    $("#datepicker").hide();
+    //displayDatePicker setting
+    $("#displayDatePicker").hide();
     $("#displayDateButton").click(function(){
-        $("#datepicker").toggle();
+        $("#displayDatePicker").toggle();
     });
-    $("#datepicker").datepicker({
+    $("#displayDatePicker").datepicker({
       dateFormat: "yymmdd",
       onSelect: function(value) {
         console.log(value);
-        $("#datepicker").hide();
+        $("#displayDatePicker").hide();
         location.hash = value;
        }
     });
+
+    //Initialise the drop down time selector on add form
+    var displayTimes = Util.getDisplayTimes();
+    for(var i = 0; i < 24.1; i = i + 0.5){
+      var opt =$("<option />")
+                .val(i)
+                .html(displayTimes[parseInt(2*i)]);
+      $("#fromTime").append(opt);
+    }
+
+    $("#fromTime").change(function(){
+      this.fromTimeSelected();
+    }.bind(this));
 
     // Get the date from the url
     if(!location.hash){
@@ -130,7 +147,7 @@ export default {
     eventsDisplay.empty();   //empty the currently displaying events.
     var eventsBlobs = this.getEventBlobs(date);     //getting the events from the local storage. each blob is a group of crashing events
 
-    //Datepicker button for selecting display date
+    //displayDatePicker button for selecting display date
     var displayDate =  Util.getDateFromUrl(date).toDateString();
     $("#displayDateButton").text(displayDate);
 
@@ -217,6 +234,18 @@ export default {
     }
     Store.editEvent(date, event, newEvent);
     this.render();
+  },
+
+  fromTimeSelected(){
+    $("#toTime").empty();
+    var selectedTime = Number($("#fromTime").val());
+    var displayTimes = Util.getDisplayTimes();
+    for(var i = selectedTime + 0.5; i < 24.1; i = i + 0.5){
+      var opt =$("<option />")
+                .val(i)
+                .html(displayTimes[parseInt(2*i)]);
+      $("#toTime").append(opt);
+    }
   },
 
   showEditDialog(date, event){
