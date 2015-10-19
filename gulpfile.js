@@ -10,7 +10,7 @@ var reload      = browserSync.reload;
 var watchify   = require('watchify');
 var notify = require('gulp-notify');
 
-var port = 1337;
+var port = 1338;
 var dist = './dist/';
 var datetime = "node_modules/react-datetime/css/";
 var source     = require('vinyl-source-stream');

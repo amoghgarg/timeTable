@@ -64,10 +64,6 @@ export default {
     var fromTime = event.starts;
     var created = event.created;
 
-    console.log(date)
-    console.log(event)
-    console.log(created)
-
     var daysEvents = JSON.parse(localStorage.getItem(date));
     var eventsStartingTogether = daysEvents[fromTime];
     var remainingEvents = eventsStartingTogether.filter(event => {

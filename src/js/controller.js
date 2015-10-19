@@ -25,6 +25,7 @@ export default {
       buttons: {
         "Save": function(){
           store.addEvent();
+          this.dialog.dialog("close");
           this.render();
         }.bind(this),
         "Cancel": function() {
@@ -78,7 +79,8 @@ export default {
                            .click(function(){
                              store.deleteEvent(date, event);
                              this.render();
-                           }.bind(this))
+                           }.bind(this));
+
         eventDiv.append(deleteButton)
                 .draggable({
                   axis: "y",
@@ -95,13 +97,51 @@ export default {
                     store.editEvent(date, event, newEvent);
                     this.render();
                   }.bind(this)
+                })
+                .resizable({
+                  handles: "n, s",
+                  grid: [1, this.rowHeight/2],
+                  containment: "#eventsDisplay",
+                  //helper: true,
+                  minHeight: this.rowHeight/2,
+                  stop: function(resizeEvent, ui){
+                    console.log("Old Event")
+                    console.log(event)
+                    var draggedHandle = ui.element.data('ui-resizable').axis;
+                    console.log(draggedHandle)
+                    if(draggedHandle == "n"){
+                      //end Time is same, only the start time has chanegd.
+                      var newDuration = (ui.size.height / this.rowHeight);
+                      var newEvent = {
+                        date: date,
+                        fromTime: event.ends - newDuration,
+                        toTime: event.ends,
+                        text: event.text
+                      };
+                    }else if (draggedHandle == "s"){
+                      //start Time is same, only the end time has chanegd.
+                      var newDuration = (ui.size.height / this.rowHeight);
+                      console.log(ui.size)
+                      console.log(newDuration)
+                      var newEvent = {
+                        date: date,
+                        fromTime: Number(event.starts),
+                        toTime: Number(event.starts) + newDuration,
+                        text: event.text
+                      };
+                    }
+                    console.log("newEvent")
+                    console.log(newEvent)
+                    store.editEvent(date, event, newEvent);
+                    this.render();
+                  }.bind(this)
                 });
         eventsDisplay.append(eventDiv);
       })
 
     })
 
-    console.log(eventsBlobs);
+    // console.log(eventsBlobs);
   },
 
   showEditDialog(date, event){
