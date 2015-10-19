@@ -1,13 +1,34 @@
 import $ from 'jquery';
 
+/*
+The data is stored in the local storage in the following format:
+e.g.:
+{
+  20151010: {        //Date
+    0100: [     //From toTime
+      {
+        toTime: 0200,
+        eventText: Meet Jim
+      },
+      {
+        toTime: 0130,
+        eventText: Mona will be there too.
+      }
+    ],
+    0300: [      //FromTime
+      {
+        toTime: 0330,
+        eventText: Meet Jerry
+      }
+    ]
+  }
+}
+
+*/
+
 export default {
-  addMessage: "Adding",
 
-  //startTime
-  //endTime
-  //text
   addEvent: function(event){
-
     var eventDate, fromTime, toTime, eventText;
     if(arguments.length == 0){
       //Get the values from the form
@@ -25,7 +46,7 @@ export default {
     var eventObject = {
       ends: toTime,
       text: eventText,
-      created: (new Date()).toUTCString()
+      created: (new Date()).getTime()
     };
 
     // getting events for the date specified
