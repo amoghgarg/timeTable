@@ -32,7 +32,7 @@ export default {
     var eventDate, fromTime, toTime, eventText;
     if(arguments.length == 0){
       //Get the values from the form
-      eventDate = $("#eventDate").val();
+      eventDate = $("#eventDatePicker").val();
       fromTime = $("#fromTime").val();
       toTime = $("#toTime").val();
       eventText = $("#eventText").val();

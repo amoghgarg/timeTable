@@ -9,8 +9,8 @@
       <div id = "headerDates">
         <button id="goToToday">Today</button>
         <span id="prevDateButton" class = "ui-icon ui-icon-seek-prev"></span>
-        <button id="displayDateButton">date</button>
-        <div id = "displayDatePicker"></div>
+        <input disabled id = "displayDatePicker"></input>
+        <input class="dateInput" id="displayDateInput">
         <span id="nextDateButton" class = "ui-icon ui-icon-seek-next"></span>
       </div>
       <div id = "headerButtons">
@@ -24,14 +24,14 @@
 
     <div id="addEventForm" title="Create new user">
       <p class="validateTips">All form fields are required.</p>
-        <div id = "eventDatePicker"></div>
+        <input id = "eventDatePicker">
         <select name="number" id="fromTime">
         </select>
         <label for="email">to</label>
         <select name="number" id="toTime">
         </select>
         <label for="eventText">Event</label>
-        <input type="text" name="" id="eventText">
+        <input autofocus type="text" name="" id="eventText">
         <!-- Allow form submission with keyboard without duplicating the dialog button -->
         <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
     </div>

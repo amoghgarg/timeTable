@@ -104,16 +104,29 @@ export default {
     });
 
     //displayDatePicker setting
-    $("#displayDatePicker").hide();
-    $("#displayDateButton").click(function(){
-        $("#displayDatePicker").toggle();
+    $("#displayDateInput").hide();
+    $("#displayDatePicker").click(function(){
+      console.log("opend")
+      $("#displayDateInput").datepicker("show");
+    })
+    $("#displayDateInput").datepicker({
+      dateFormat: "yymmdd",
+      showOn: "button",
+      altFormat: "yy-mm-dd",
+      altField: "#displayDatePicker",
+      onSelect: function(value) {
+        var altValue = $("#displayDateInput").datepicker( "option", "altFormat" );
+        $("#displayDateInput").hide();
+        //$("#displayDateInput").datepicker("option", "buttonText", altValue);
+        location.hash = value;
+       }
     });
-    $("#displayDatePicker").datepicker({
+
+    $("#eventDatePicker").datepicker({
       dateFormat: "yymmdd",
       onSelect: function(value) {
         console.log(value);
-        $("#displayDatePicker").hide();
-        location.hash = value;
+        //$("#eventDatePicker").hide();
        }
     });
 
@@ -150,6 +163,7 @@ export default {
     //displayDatePicker button for selecting display date
     var displayDate =  Util.getDateFromUrl(date).toDateString();
     $("#displayDateButton").text(displayDate);
+    $("#displayDateInput").datepicker("setDate", date);
 
     eventsBlobs.map(blob => {
       var crashingEventsCount = blob.events.length;   //crashing Events are those which have some overlap in time, and thus need to rendered with divided width.
@@ -254,6 +268,7 @@ export default {
     if(editing){
       $("#eventDate").val(date);
       $("#fromTime").val(event.starts);
+      this.fromTimeSelected();
       $("#toTime").val(event.ends);
       $("#eventText").val(event.text);
     }

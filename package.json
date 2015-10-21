@@ -16,7 +16,7 @@
     "browser-sync": "^2.9.11",
     "browserify": "^6.3.3",
     "del": "^1.1.1",
-    "eslint": "^1.7.1",
+    "eslint": "^1.7.2",
     "gulp": "~3.8.10",
     "gulp-concat-css": "^2.2.0",
     "gulp-load-plugins": "^1.0.0",
