@@ -1,0 +1,60 @@
+#eventsBoard {
+  display: flex;
+}
+
+#eventsDisplay {
+  flex: 1;
+  position: relative;
+}
+
+#eventsDisplay > div {
+  background-color: pink;
+  position: absolute;
+  border-style: solid;
+  border-width: 2px;
+}
+
+#hourRange > ul {
+  list-style-type: none;
+  padding: 0;
+  line-height: 40px;
+  margin: 0px;
+}
+
+#hourRange {
+  margin: 0;
+}
+
+#header {
+  display: flex;
+}
+
+#headerDates {
+  width: 300px;
+  display: flex;
+}
+
+/*#headerDates span {
+  flex: 1;
+}*/
+
+#displayDateButton button {
+  flex: 3;
+}
+
+#headerButtons {
+  flex: 1;
+}
+
+#headerButtons > button {
+  float: right;
+}
+
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hiddenTime {
+  visibility: hidden;
+}
