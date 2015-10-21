@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>Your plans!</title>
+
+    <meta name="mobile-web-app-capable" content="yes">
+  </head>
+  <body>
+    <div class = "header" id = "header">
+      <div id = "headerDates">
+        <button id="goToToday">Today</button>
+        <span id="prevDateButton" class = "ui-icon ui-icon-seek-prev"></span>
+        <input disabled id = "displayDatePicker"></input>
+        <input class="dateInput" id="displayDateInput">
+        <span id="nextDateButton" class = "ui-icon ui-icon-seek-next"></span>
+      </div>
+      <div id = "headerButtons">
+        <button id="addButton" class="addButton">Add</button>
+        <button id="showInfoButton">i</button>
+      </div>
+    </div>
+
+
+    <script src="./src/js/app.js"> </script>
+
+    <div id="addEventForm" title="Create new user">
+      <p class="validateTips">All form fields are required.</p>
+        <input id = "eventDatePicker">
+        <select name="number" id="fromTime">
+        </select>
+        <label for="email">to</label>
+        <select name="number" id="toTime">
+        </select>
+        <label for="eventText">Event</label>
+        <input autofocus type="text" name="" id="eventText">
+        <!-- Allow form submission with keyboard without duplicating the dialog button -->
+        <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </div>
+
+    <div id="eventsBoard">
+      <div id="hourRange">
+        <ul>
+          <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>
+          <li>6</li><li>7</li><li>8</li><li>9</li><li>10</li><li>11</li>
+          <li>12</li><li>13</li><li>14</li><li>15</li><li>16</li><li>17</li>
+          <li>18</li><li>19</li><li>21</li><li>22</li><li>23</li><li>24</li>
+        </ul>
+      </div>
+      <div id="eventsDisplay">
+      </div>
+    </div>
+
+    <div id="infoDialog">
+      <p>
+        i: show info
+        t: go to today
+        left: previous day
+        right: next day
+        n: add new event
+      </p>
+      <p>
+        draggable
+        size change
+      </p>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+      app();
+    });
+    </script>
+  </body>
+  <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/>
+  <link rel="stylesheet" type="text/css" href="./css/bundle.css">
+</html>
