@@ -1,4 +1,14 @@
 export default {
+
+
+  dispDateFormat() {
+    return 'D, d M yy';
+  },
+
+  formDateFormat(){
+    return 'D, d M yy';
+  },
+
   //Check if the data object is empty
   isEventsEmpty(events){
     var result = true;
@@ -34,7 +44,7 @@ export default {
 
   getDateString(which, urlDate){
     if(which == "today"){
-      return (new Date()).toISOString().slice(0,10).replace(/-/g,"");
+      return (new Date()).toLocaleString("en-GB").substr(0,10).split("/").reverse().join("");
     }
     if(which == "next"){
       var currentDate = this.getDateFromUrl(urlDate);
@@ -52,12 +62,19 @@ export default {
     }
   },
 
-  getDateFromUrl(urlDate){
-    var year = urlDate.substr(0,4);
-    var month = urlDate.substr(4,2) - 1;
-    var day = urlDate.substr(6,2);
+  getDateFromUrl(strDate){
+    var year = strDate.substr(0,4);
+    var month = strDate.substr(4,2) - 1;
+    var day = strDate.substr(6,2);
     var date = new Date(year, month, day);
     return (date);
+  },
+
+  getSlashDate(strDate){
+    var year = strDate.substr(0,4);
+    var month = strDate.substr(4,2);
+    var day = strDate.substr(6,2);
+    return (year + "/" + month + "/" + day);
   },
 
   getDisplayTimes(){

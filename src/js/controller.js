@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Store from './store';
-import Util from './util'
+import Util from './util';
 import 'jquery-ui';
 
 
@@ -11,7 +11,10 @@ export default {
   init(){
 
     //height of 1 hour event, in pixels
-    this.hourHeight = 40;
+    this.hourHeight = 80;
+    this.eventMargin = 4;
+    this.eventBorder = 2;
+    this.heightSubtraction = 2*(this.eventMargin + this.eventBorder);
 
     ///////////  Tagging Events  ///////////////
     $("#addButton").bind("click", function(){
@@ -53,7 +56,6 @@ export default {
 
         //press i to show help
         if(e.keyCode == 73){
-          e.preventDefault();
           if(!$("#infoDialog").dialog("isOpen")){
             $("#infoDialog").dialog("open");
           }else{
@@ -61,7 +63,6 @@ export default {
           }
         }
       }
-
     }.bind(this));
     ////////////////////////////////////////////////
 
@@ -103,32 +104,23 @@ export default {
         closeText: ""
     });
 
-    //displayDatePicker setting
+    // displayDatePicker setting
     $("#displayDateInput").hide();
-    $("#displayDatePicker").click(function(){
-      console.log("opend")
-      $("#displayDateInput").datepicker("show");
-    })
     $("#displayDateInput").datepicker({
       dateFormat: "yymmdd",
       showOn: "button",
-      altFormat: "yy-mm-dd",
+      altFormat: Util.dispDateFormat(),
       altField: "#displayDatePicker",
       onSelect: function(value) {
-        var altValue = $("#displayDateInput").datepicker( "option", "altFormat" );
-        $("#displayDateInput").hide();
-        //$("#displayDateInput").datepicker("option", "buttonText", altValue);
         location.hash = value;
        }
     });
+    $("#displayDatePicker").datepicker("hide");
 
     $("#eventDatePicker").datepicker({
-      dateFormat: "yymmdd",
-      onSelect: function(value) {
-        console.log(value);
-        //$("#eventDatePicker").hide();
-       }
+      dateFormat: Util.formDateFormat()
     });
+    $("#eventDatePicker").datepicker("hide");
 
     //Initialise the drop down time selector on add form
     var displayTimes = Util.getDisplayTimes();
@@ -146,10 +138,30 @@ export default {
     // Get the date from the url
     if(!location.hash){
       //default set to todays date.
-      location.hash = (new Date()).toISOString().slice(0,10).replace(/-/g,"")
+      location.hash = (new Date()).toLocaleString("en-GB").substr(0,10).split("/").reverse().join("");
+    }
+
+    window.onresize = function(a, b){
+      console.log(a)
+      console.log(b)
     }
     this.render();
     console.log("Calender initialised.");
+    $("#ui-datepicker-div").hide();
+  },
+
+  renderSepartors(){
+    var eventsDisplay = $("#eventsDisplay");
+    for(var h = 1; h < 25; h++){
+      var dashedLine = $('<hr />')
+                  .addClass("halfHourSeparator")
+                  .css("top", h*this.hourHeight - this.hourHeight/2);
+      var line = $('<hr />')
+                  .addClass("oneHourSeparator")
+                  .css("top", h*this.hourHeight);
+      eventsDisplay.append(dashedLine);
+      eventsDisplay.append(line);
+    }
   },
 
   render(){
@@ -157,7 +169,9 @@ export default {
     this.hash = location.hash.substr(1);
     var date = this.hash;
     var eventsDisplay = $("#eventsDisplay");
-    eventsDisplay.empty();   //empty the currently displaying events.
+    eventsDisplay.empty();
+    this.renderSepartors();
+    //$("#indiEvent").remove();   //empty the currently displaying events.
     var eventsBlobs = this.getEventBlobs(date);     //getting the events from the local storage. each blob is a group of crashing events
 
     //displayDatePicker button for selecting display date
@@ -170,10 +184,11 @@ export default {
       var eachWidth = 100/crashingEventsCount;
       blob.events.map((event, index) => {
         var top = event.starts*this.hourHeight + "px";
-        var height = (event.ends - event.starts)*this.hourHeight;
+        var height = (event.ends - event.starts)*this.hourHeight - this.heightSubtraction;
         var left = index*eachWidth + "%";
-        var width = eachWidth + "%";
-        var style = "top: " + top + "; height: " + height + "; width: " + width + "; left: " + left;
+        // var width = "calc(" + eachWidth + "%" + " - " + 2*this.eventBorder + "px)";
+        // console.log(width)
+        var style = "top: " + top + "; height: " + height + "; left: " + left;
 
         var deleteButton = $('<span />')
                            .attr("class", "ui-icon ui-icon-trash")
@@ -184,10 +199,15 @@ export default {
 
         var eventDiv = $('<div />')
                        .attr("style", style)
+                       .attr("class", "indiEvent")
+                       .css('width', (eachWidth-1.1)+'%')
                        .text(event.text)
                        .dblclick(function(){
                          this.showEditDialog(date, event);
                        }.bind(this));
+       if(index > 0){
+         eventDiv.addClass("noLeftMargin");
+       }
 
         eventDiv.append(deleteButton)
                 .draggable({
@@ -202,8 +222,10 @@ export default {
                   handles: "n, s",
                   grid: [1, this.hourHeight/2],
                   containment: "#eventsDisplay",
-                  minHeight: this.hourHeight/2,
+                  minHeight: this.hourHeight/2 - this.heightSubtraction,
                   stop: function(resizeEvent, ui){
+                    console.log(resizeEvent)
+                    console.log(ui)
                     this.onResizeStopped(ui, date, event);
                   }.bind(this)
                 });
@@ -214,7 +236,7 @@ export default {
   },
 
   onDragStopped(ui, date, event){
-    var newFromTime = Number((ui.position.top)/40*1);
+    var newFromTime = Number((ui.position.top)/this.hourHeight);
     var newEvent = {
       date: date,
       fromTime: newFromTime,
@@ -226,10 +248,11 @@ export default {
   },
 
   onResizeStopped(ui, date, event){
+    var height = ui.size.height + this.heightSubtraction;
     var draggedHandle = ui.element.data('ui-resizable').axis;
     if(draggedHandle == "n"){
       //end Time is same, only the start time has chanegd.
-      var newDuration = (ui.size.height / this.hourHeight);
+      var newDuration = (height / this.hourHeight);
       var newEvent = {
         date: date,
         fromTime: event.ends - newDuration,
@@ -238,7 +261,7 @@ export default {
       };
     }else if (draggedHandle == "s"){
       //start Time is same, only the end time has chanegd.
-      var newDuration = (ui.size.height / this.hourHeight);
+      var newDuration = (height / this.hourHeight);
       var newEvent = {
         date: date,
         fromTime: Number(event.starts),
@@ -266,7 +289,9 @@ export default {
 
     var editing = arguments.length == 2 ? true:false; //false means adding new event
     if(editing){
-      $("#eventDate").val(date);
+      $("#eventDatePicker").datepicker("option", "dateFormat", "yymmdd");
+      $("#eventDatePicker").datepicker("setDate", date);
+      $("#eventDatePicker").datepicker("option", "dateFormat", Util.formDateFormat());
       $("#fromTime").val(event.starts);
       this.fromTimeSelected();
       $("#toTime").val(event.ends);
@@ -274,7 +299,9 @@ export default {
     }
     else{
       //new event, so just fill the date.
-      $("#eventDate").val(this.hash);
+      $("#eventDatePicker").datepicker("option", "dateFormat", "yymmdd");
+      $("#eventDatePicker").datepicker("setDate", this.hash);
+      $("#eventDatePicker").datepicker("option", "dateFormat", Util.formDateFormat());
       $("#fromTime").val("");
       $("#toTime").val("");
       $("#eventText").val("");
@@ -321,7 +348,9 @@ export default {
         events[fromTime].map((event, index) => {
           var startsInBlob = Number(fromTime) >= Number(blob.startTime) && Number(fromTime) < Number(blob.endTime);
           var endsInBlob = Number(event.ends) > Number(blob.startTime) && Number(event.ends) <= Number(blob.endTime);
-          if(startsInBlob || endsInBlob){
+          var blobStartsInEvent = Number(blob.startTime) >= Number(fromTime) && Number(blob.startTime) < Number(event.ends);
+          var blobEndsInEvent = Number(blob.endTime) > Number(fromTime) && Number(blob.endTime) <= Number(event.ends);
+          if(startsInBlob || endsInBlob || blobStartsInEvent || blobEndsInEvent){
             blob.events.push({
               starts: fromTime,
               ends: event.ends,
@@ -337,6 +366,8 @@ export default {
         indicesToRemove.reverse().map(indToRemove => {
           events[fromTime].splice(indToRemove, 1);
         })
+
+        console.log()
       });
 
       eventBlobs.push(blob);

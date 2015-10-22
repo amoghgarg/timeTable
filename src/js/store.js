@@ -1,4 +1,6 @@
 import $ from 'jquery';
+import Util from './util';
+
 
 /*
 The data is stored in the local storage in the following format:
@@ -32,7 +34,9 @@ export default {
     var eventDate, fromTime, toTime, eventText;
     if(arguments.length == 0){
       //Get the values from the form
+      $("#eventDatePicker").datepicker("option", "dateFormat", "yymmdd")  
       eventDate = $("#eventDatePicker").val();
+      $("#eventDatePicker").datepicker("option", "dateFormat", Util.formDateFormat);
       fromTime = $("#fromTime").val();
       toTime = $("#toTime").val();
       eventText = $("#eventText").val();
