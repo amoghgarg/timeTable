@@ -12,17 +12,13 @@ export default {
 
     //height of 1 hour event, in pixels
     this.hourHeight = 80;
-    this.eventMargin = 4;
+    this.eventMargin = 2;
     this.eventBorder = 2;
     this.heightSubtraction = 2*(this.eventMargin + this.eventBorder);
 
     ///////////  Tagging Events  ///////////////
     $("#addButton").bind("click", function(){
       this.showEditDialog();
-    }.bind(this));
-
-    $("#showInfoButton").bind("click", function(){
-      $("#infoDialog").dialog("open");
     }.bind(this));
 
     window.onhashchange = this.render.bind(this);
@@ -53,7 +49,7 @@ export default {
           e.preventDefault();
           location.hash = Util.getDateString("previous", this.hash);
         }
-        
+
       }
     }.bind(this));
     ////////////////////////////////////////////////
@@ -73,9 +69,12 @@ export default {
     // Initialise the new event form
     this.dialog = $( "#addEventForm" ).dialog({
       autoOpen: false,
-      height: 300,
+      height: 200,
       width: 350,
       modal: true,
+      resizable: false,
+      draggable: false,
+      dialogClass: "eventForm",
       buttons: {
         "Cancel": function() {
           this.dialog.dialog( "close" );
@@ -86,14 +85,6 @@ export default {
         $("#toTime").empty();
         this.render();
       }.bind(this)
-    });
-
-
-    //Initialise info dialog
-    $("#infoDialog").dialog({
-        modal: true,
-        autoOpen: false,
-        closeText: ""
     });
 
     // displayDatePicker setting
@@ -133,10 +124,6 @@ export default {
       location.hash = (new Date()).toLocaleString("en-GB").substr(0,10).split("/").reverse().join("");
     }
 
-    window.onresize = function(a, b){
-      console.log(a)
-      console.log(b)
-    }
     this.render();
     console.log("Calender initialised.");
     // $("#ui-datepicker-div").hide();
@@ -177,48 +164,45 @@ export default {
       blob.events.map((event, index) => {
         var top = event.starts*this.hourHeight + "px";
         var height = (event.ends - event.starts)*this.hourHeight - this.heightSubtraction;
-        var left = index*eachWidth + "%";
+        var left = index*(eachWidth) + (index > 0)*0.5 +"%";
         // var width = "calc(" + eachWidth + "%" + " - " + 2*this.eventBorder + "px)";
         // console.log(width)
         var style = "top: " + top + "; height: " + height + "; left: " + left;
 
-        var deleteButton = $('<span />')
-                           .attr("class", "ui-icon ui-icon-trash")
+        var deleteButton = $('<i />')
+                           .attr("class", "fa fa-trash-o")
                            .click(function(){
                              Store.deleteEvent(date, event);
                              this.render();
                            }.bind(this));
 
+        var eventDispId = event.starts+"-"+index;
         var eventDiv = $('<div />')
+                       .attr("id", eventDispId)
                        .attr("style", style)
                        .attr("class", "indiEvent")
-                       .css('width', (eachWidth-1.1)+'%')
-                       .text(event.text)
+                       .css('width', (eachWidth-1)+'%')
                        .dblclick(function(){
                          this.showEditDialog(date, event);
                        }.bind(this));
-       if(index > 0){
-         eventDiv.addClass("noLeftMargin");
+       if(index == 0){
+         eventDiv.addClass("firstEventInCrash");
        }
 
-        eventDiv.append(deleteButton)
+       var textDiv = $('<div />')
+                     .text(event.text)
+                     .addClass("textDiv")
+
+
+
+        eventDiv.append(textDiv)
+                .append(deleteButton)
                 .draggable({
                   axis: "y",
                   containment: "#eventsDisplay",
                   grid: [1, this.hourHeight/2],
                   stop: function(dragEvent, ui){
                     this.onDragStopped(ui, date, event);
-                  }.bind(this)
-                })
-                .resizable({
-                  handles: "n, s",
-                  grid: [1, this.hourHeight/2],
-                  containment: "#eventsDisplay",
-                  minHeight: this.hourHeight/2 - this.heightSubtraction,
-                  stop: function(resizeEvent, ui){
-                    console.log(resizeEvent)
-                    console.log(ui)
-                    this.onResizeStopped(ui, date, event);
                   }.bind(this)
                 });
         eventsDisplay.append(eventDiv);
@@ -235,32 +219,6 @@ export default {
       toTime: newFromTime + Number(event.ends) - Number(event.starts),
       text: event.text
     };
-    Store.editEvent(date, event, newEvent);
-    this.render();
-  },
-
-  onResizeStopped(ui, date, event){
-    var height = ui.size.height + this.heightSubtraction;
-    var draggedHandle = ui.element.data('ui-resizable').axis;
-    if(draggedHandle == "n"){
-      //end Time is same, only the start time has chanegd.
-      var newDuration = (height / this.hourHeight);
-      var newEvent = {
-        date: date,
-        fromTime: event.ends - newDuration,
-        toTime: event.ends,
-        text: event.text
-      };
-    }else if (draggedHandle == "s"){
-      //start Time is same, only the end time has chanegd.
-      var newDuration = (height / this.hourHeight);
-      var newEvent = {
-        date: date,
-        fromTime: Number(event.starts),
-        toTime: Number(event.starts) + newDuration,
-        text: event.text
-      };
-    }
     Store.editEvent(date, event, newEvent);
     this.render();
   },
