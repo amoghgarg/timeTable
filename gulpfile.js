@@ -1,9 +1,12 @@
 var gulp = require('gulp');
 var path = require('path');
-var $ = require('gulp-load-plugins')();
+var $ = require('gulp-load-plugins');
 var del = require('del');
 var isProduction = false;
 var concatCss = require('gulp-concat-css');
+var autoprefixer = require('gulp-autoprefixer');
+
+
 
 var browserSync = require('browser-sync');
 var reload      = browserSync.reload;
@@ -92,6 +95,7 @@ gulp.task('styles', function(cb){
   return gulp.src(['src/css/*.css', ])
     .pipe(concatCss('bundle.css'))
     //.pipe($.autoprefixer({browsers: autoprefixerBrowsers}))
+    .pipe(autoprefixer())
     .pipe(gulp.dest(dist + 'css/'))
     .pipe(browserSync.stream())
     .on('end', function() {

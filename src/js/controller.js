@@ -53,15 +53,7 @@ export default {
           e.preventDefault();
           location.hash = Util.getDateString("previous", this.hash);
         }
-
-        //press i to show help
-        if(e.keyCode == 73){
-          if(!$("#infoDialog").dialog("isOpen")){
-            $("#infoDialog").dialog("open");
-          }else{
-            $("#infoDialog").dialog("close");
-          }
-        }
+        
       }
     }.bind(this));
     ////////////////////////////////////////////////
@@ -105,7 +97,7 @@ export default {
     });
 
     // displayDatePicker setting
-    $("#displayDateInput").hide();
+    // $("#displayDateInput").hide();
     $("#displayDateInput").datepicker({
       dateFormat: "yymmdd",
       showOn: "button",
@@ -120,7 +112,7 @@ export default {
     $("#eventDatePicker").datepicker({
       dateFormat: Util.formDateFormat()
     });
-    $("#eventDatePicker").datepicker("hide");
+    $("#ui-datepicker-div").hide();
 
     //Initialise the drop down time selector on add form
     var displayTimes = Util.getDisplayTimes();
@@ -147,7 +139,7 @@ export default {
     }
     this.render();
     console.log("Calender initialised.");
-    $("#ui-datepicker-div").hide();
+    // $("#ui-datepicker-div").hide();
   },
 
   renderSepartors(){
@@ -296,15 +288,18 @@ export default {
       this.fromTimeSelected();
       $("#toTime").val(event.ends);
       $("#eventText").val(event.text);
+      $("addEventForm").attr("title", "Edit event");
     }
     else{
       //new event, so just fill the date.
       $("#eventDatePicker").datepicker("option", "dateFormat", "yymmdd");
       $("#eventDatePicker").datepicker("setDate", this.hash);
       $("#eventDatePicker").datepicker("option", "dateFormat", Util.formDateFormat());
-      $("#fromTime").val("");
-      $("#toTime").val("");
+      var timeNow = (new Date()).getHours() + 0.5;
+      $("#fromTime").val(timeNow);
+      this.fromTimeSelected();
       $("#eventText").val("");
+      $("addEventForm").attr("title", "Add a new event");
     }
 
     this.dialog.dialog('option', 'buttons', {
