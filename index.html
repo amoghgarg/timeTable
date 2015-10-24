@@ -9,51 +9,50 @@
     <script src="./src/js/app.js"> </script>
 
     <div id="addEventForm" title="Add new event">
-        <input id = "eventDatePicker">
-        <select name="number" id="fromTime">
-        </select>
-        <label for="email">to</label>
-        <select name="number" id="toTime">
-        </select>
-        <label for="eventText">Event</label>
-        <input autofocus type="text" name="" id="eventText">
+        <input placeholder="when?" id = "eventDatePicker">
+        <div id="timeInput">
+          <select name="number" id="fromTime">
+          </select>
+          <span>to</span>
+          <select name="number" id="toTime">
+          </select>
+      </div>
+        <textarea maxlength="50" placeholder="what?" autofocus type="text" name="" id="eventText">
+        </textarea>
     </div>
 
     <div id="mainBody">
       <div id="controlBoard">
         <button class='btn' id="goToToday">Today</button>
-        <button id="prevDateButton" class="btn"><i class="fa fa-chevron-left"></i></button>
+        <button id="prevDateButton" class="btn btn-primary"><i class="fa fa-chevron-left"></i></button>
         <input disabled id = "displayDatePicker"></input>
-        <button id="nextDateButton" class="btn"><i class="fa fa-chevron-right"></i></button>
+        <button id="nextDateButton" class="btn btn-primary"><i class="fa fa-chevron-right"></i></button>
         <div class="dateInput" id="displayDateInput"></div>
         <button id="addButton" class="btn btn-add addButton">Add</button>
-      </div>
-      <div id="eventsBoard">
-        <div id="hourRange">
-          <ul>
-            <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>
-            <li>6</li><li>7</li><li>8</li><li>9</li><li>10</li><li>11</li>
-            <li>12</li><li>13</li><li>14</li><li>15</li><li>16</li><li>17</li>
-            <li>18</li><li>19</li><li>20</li><li>21</li><li>22</li><li>23</li><li>24</li>
-          </ul>
-        </div>
-        <div id="eventsDisplay">
-        </div>
-      </div>
-    </div>
 
-    <div id="infoDialog">
-      <p>
-        i: show info
-        t: go to today
-        left: previous day
-        right: next day
-        n: add new event
-      </p>
-      <p>
-        draggable
-        size change
-      </p>
+        <div id="infoDialog">
+          <span>
+            t: show today | n: new event<br>
+            right, left: navigate dates<br>
+            drag: edit time<br>
+            double clik: edit event<br>
+          </span>
+        </div>
+      </div>
+      <div id="eventsBoardContainer">
+        <div id="eventsBoard">
+          <div id="hourRange">
+            <ul>
+              <li>12am</li><li>1am</li><li>2am</li><li>3am</li><li>4am</li><li>5am</li>
+              <li>6am</li><li>7am</li><li>8am</li><li>9am</li><li>10am</li><li>11am</li>
+              <li>12pm</li><li>1pm</li><li>2pm</li><li>3pm</li><li>4pm</li><li>5pm</li>
+              <li>6pm</li><li>7pm</li><li>8pm</li><li>9pm</li><li>10pm</li><li>11pm</li>
+            </ul>
+          </div>
+          <div id="eventsDisplay">
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
