@@ -292,6 +292,7 @@ body {
 }
 
 .btn-add {
+  font-size: 21px;
   background-color: #3cbd77;
   color: white;
   width: 100%;
