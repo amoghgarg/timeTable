@@ -13,10 +13,8 @@ cd timeTable
 
 # Then, you need to install all the dependencies...
 npm install
-```
 
-### Running in the browser
-```bash
+# Running in the browser
 gulp
 ```
 
